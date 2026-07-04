@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Mawaqit — مواقيت</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --night-950:#081821;
+  --night-900:#0B1F2A;
+  --night-800:#132E3A;
+  --night-700:#1B3D4A;
+  --teal-600:#1F6F5C;
+  --teal-500:#2D8C74;
+  --gold-500:#D4AF6A;
+  --gold-400:#E3C48A;
+  --sand-50:#F7F3EA;
+  --sand-100:#EFE8D8;
+  --ink-900:#16211F;
+  --ink-700:#3A4A46;
+  --cream-text:#EDE6D6;
+  --muted-dark:#7FA39B;
+  --muted-light:#7C8B87;
+  --danger:#C4664F;
+  --radius-lg:22px;
+  --radius-md:16px;
+  --radius-sm:10px;
+  --shadow-soft:0 10px 30px rgba(8,24,33,0.25);
+  --font-body:'Inter', 'Noto Naskh Arabic', sans-serif;
+  --font-display:'Amiri', 'Noto Naskh Arabic', serif;
+  --font-ur:'Noto Nastaliq Urdu', serif;
+}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:var(--font-body);
+  background:var(--sand-50);
+  color:var(--ink-900);
+  overflow-x:hidden;
+  transition:background .4s ease, color .4s ease;
+}
+body.dark{
+  background:var(--night-950);
+  color:var(--cream-text);
+}
+body[dir="rtl"] .flip-icon{ transform:scaleX(-1); }
+
+#app{
+  max-width:440px;
+  margin:0 auto;
+  min-height:100vh;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ---------- Top bar ---------- */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:18px 20px 6px;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-family:var(--font-display);
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:.3px;
+}
+body.dark .brand{ color:var(--gold-400); }
+body:not(.dark) .brand{ color:var(--teal-600); }
+.brand .crescent{ font-size:20px; }
+
+.icon-btn{
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(127,163,155,.3);
+  background:transparent;
+  cursor:pointer;
+  color:inherit;
+  font-size:16px;
+  transition:background .2s;
+}
+.icon-btn:active{ transform:scale(.94); }
+body.dark .icon-btn{ background:rgba(255,255,255,.04); }
+body:not(.dark) .icon-btn{ background:rgba(0,0,0,.03); }
+
+/* ---------- Date / location strip ---------- */
+.date-strip{
+  padding:0 20px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  margin-bottom:6px;
+}
+.hijri-date{ font-size:15px; font-weight:600; }
+.greg-location{
+  font-size:12.5px;
+  color:var(--muted-light);
+  display:flex; gap:6px; align-items:center;
+}
+body.dark .greg-location{ color:var(--muted-dark); }
+
+/* ---------- Sun Arc (signature element) ---------- */
+.arc-wrap{
+  position:relative;
+  margin:14px 20px 4px;
+  height:150px;
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+  background:linear-gradient(180deg, var(--night-900) 0%, var(--night-800) 70%, var(--teal-600) 130%);
+}
+body:not(.dark) .arc-wrap{
+  background:linear-gradient(180deg, #EAF3EF 0%, #DCEEE6 60%, #C9E4D8 130%);
+}
+.arc-svg{ position:absolute; inset:0; width:100%; height:100%; }
+.arc-label{
+  position:absolute;
+  bottom:10px; left:0; right:0;
+  text-align:center;
+  font-size:11.5px;
+  letter-spacing:.5px;
+  color:rgba(255,255,255,.65);
+}
+body:not(.dark) .arc-label{ color:rgba(20,40,35,.55); }
+
+/* ---------- Next prayer hero card ---------- */
+.hero-card{
+  margin:16px 20px 8px;
+  padding:22px 22px;
+  border-radius:var(--radius-lg);
+  background:linear-gradient(135deg, var(--teal-600), var(--teal-500));
+  color:#fff;
+  box-shadow:var(--shadow-soft);
+  position:relative;
+  overflow:hidden;
+}
+.hero-card::after{
+  content:"";
+  position:absolute; inset:0;
+  background:radial-gradient(circle at 85% -10%, rgba(212,175,106,.35), transparent 60%);
+}
+.hero-eyebrow{
+  font-size:11.5px;
+  text-transform:uppercase;
+  letter-spacing:1.2px;
+  opacity:.85;
+  position:relative;
+}
+.hero-name{
+  font-family:var(--font-display);
+  font-size:34px;
+  font-weight:700;
+  margin:4px 0 2px;
+  position:relative;
+}
+.hero-time{
+  font-size:16px;
+  opacity:.92;
+  margin-bottom:14px;
+  position:relative;
+}
+.countdown{
+  display:flex;
+  gap:10px;
+  position:relative;
+}
+.cd-box{
+  background:rgba(255,255,255,.16);
+  border-radius:12px;
+  padding:8px 12px;
+  text-align:center;
+  min-width:58px;
+  backdrop-filter:blur(4px);
+}
+.cd-num{ font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; }
+.cd-lbl{ font-size:10px; opacity:.8; margin-top:1px;}
+
+/* ---------- Prayer list ---------- */
+.prayer-list{
+  margin:14px 20px 10px;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+.prayer-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:13px 16px;
+  border-radius:var(--radius-md);
+  background:#fff;
+  border:1px solid rgba(0,0,0,.05);
+}
+body.dark .prayer-row{
+  background:var(--night-800);
+  border-color:rgba(255,255,255,.05);
+}
+.prayer-row.active{
+  background:linear-gradient(135deg, var(--gold-500), var(--gold-400));
+  border-color:transparent;
+  color:var(--night-950);
+}
+.pr-left{ display:flex; align-items:center; gap:12px; }
+.pr-icon{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(31,111,92,.12);
+  font-size:16px;
+}
+body.dark .pr-icon{ background:rgba(212,175,106,.12); }
+.prayer-row.active .pr-icon{ background:rgba(11,31,42,.15); }
+.pr-name{ font-weight:600; font-size:15px; }
+.pr-sub{ font-size:11.5px; color:var(--muted-light); }
+body.dark .pr-sub{ color:var(--muted-dark); }
+.prayer-row.active .pr-sub{ color:rgba(11,31,42,.65); }
+.pr-time{ font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; }
+.pr-toggle{
+  width:36px;height:20px;border-radius:20px;
+  background:rgba(0,0,0,.15);
+  position:relative;
+  margin-inline-start:10px;
+  cursor:pointer;
+  flex-shrink:0;
+  transition:background .2s;
+}
+.pr-toggle.on{ background:var(--teal-600); }
+.prayer-row.active .pr-toggle.on{ background:var(--night-950); }
+.pr-toggle::after{
+  content:"";
+  position:absolute; top:2px; inset-inline-start:2px;
+  width:16px;height:16px;border-radius:50%;
+  background:#fff;
+  transition:inset-inline-start .2s;
+}
+.pr-toggle.on::after{ inset-inline-start:18px; }
+
+/* ---------- Azkar section ---------- */
+.section-title{
+  margin:20px 20px 10px;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:.3px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.azkar-scroll{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding:0 20px 6px;
+  scrollbar-width:none;
+}
+.azkar-scroll::-webkit-scrollbar{ display:none; }
+.azkar-card{
+  min-width:210px;
+  background:#fff;
+  border-radius:var(--radius-md);
+  padding:14px 16px;
+  border:1px solid rgba(0,0,0,.05);
+  flex-shrink:0;
+}
+body.dark .azkar-card{ background:var(--night-800); border-color:rgba(255,255,255,.05);}
+.azkar-arabic{
+  font-family:var(--font-display);
+  font-size:17px;
+  line-height:1.6;
+  margin-bottom:6px;
+}
+.azkar-translit{ font-size:11.5px; color:var(--muted-light); }
+body.dark .azkar-translit{ color:var(--muted-dark); }
+
+/* ---------- Bottom nav ---------- */
+.bottom-nav{
+  position:sticky;
+  bottom:0;
+  margin-top:auto;
+  display:flex;
+  justify-content:space-around;
+  padding:10px 8px calc(10px + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(14px);
+  border-top:1px solid rgba(0,0,0,.06);
+}
+body.dark .bottom-nav{
+  background:rgba(11,31,42,.92);
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.nav-btn{
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  background:none; border:none; cursor:pointer;
+  color:var(--muted-light);
+  font-family:var(--font-body);
+  font-size:10.5px;
+  padding:4px 10px;
+  transition:color .2s;
+}
+body.dark .nav-btn{ color:var(--muted-dark); }
+.nav-btn.active{ color:var(--teal-600); }
+body.dark .nav-btn.active{ color:var(--gold-400); }
+.nav-icon{ font-size:19px; }
+
+/* ---------- Page container ---------- */
+.page{ padding-bottom:10px; flex:1; }
+
+/* ---------- Qibla page ---------- */
+.qibla-wrap{
+  display:flex; flex-direction:column; align-items:center;
+  padding:30px 20px 10px;
+}
+.compass-outer{
+  width:250px; height:250px; border-radius:50%;
+  background:radial-gradient(circle at 30% 25%, var(--night-800), var(--night-950));
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  box-shadow:var(--shadow-soft);
+  border:6px solid rgba(212,175,106,.15);
+}
+body:not(.dark) .compass-outer{
+  background:radial-gradient(circle at 30% 25%, #fff, #EFE8D8);
+}
+.compass-needle{
+  width:6px; height:100px;
+  background:linear-gradient(to top, var(--gold-500), var(--gold-400));
+  border-radius:6px;
+  position:absolute;
+  top:25px;
+  transform-origin:bottom center;
+  transition:transform .3s ease-out;
+}
+.compass-needle::before{
+  content:"🕋";
+  position:absolute; top:-24px; left:50%; transform:translateX(-50%);
+  font-size:20px;
+}
+.compass-center{
+  width:14px;height:14px;border-radius:50%;
+  background:var(--teal-500);
+  z-index:2;
+}
+.qibla-info{
+  margin-top:22px; text-align:center;
+}
+.qibla-deg{ font-size:32px; font-weight:800; font-variant-numeric:tabular-nums; }
+.qibla-sub{ font-size:12.5px; color:var(--muted-light); margin-top:4px; }
+body.dark .qibla-sub{ color:var(--muted-dark); }
+.perm-btn{
+  margin-top:18px;
+  padding:11px 22px;
+  border-radius:30px;
+  border:none;
+  background:var(--teal-600);
+  color:#fff;
+  font-weight:600;
+  font-size:13.5px;
+  cursor:pointer;
+}
+
+/* ---------- Calendar page ---------- */
+.cal-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 20px 8px;
+}
+.cal-title{ font-size:17px; font-weight:700; }
+.cal-nav-btn{
+  width:32px;height:32px;border-radius:50%;
+  border:1px solid rgba(127,163,155,.3);
+  background:transparent; color:inherit; cursor:pointer;
+}
+.cal-list{ padding:6px 20px 10px; display:flex; flex-direction:column; gap:7px; }
+.cal-row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:11px 14px; border-radius:12px;
+  background:#fff; border:1px solid rgba(0,0,0,.05);
+  font-size:12.5px;
+}
+body.dark .cal-row{ background:var(--night-800); border-color:rgba(255,255,255,.05); }
+.cal-row.today{ outline:2px solid var(--gold-500); }
+.cal-day{ font-weight:700; width:34px; }
+.cal-times{ display:flex; gap:10px; font-variant-numeric:tabular-nums; color:var(--muted-light); flex-wrap:wrap; justify-content:flex-end;}
+body.dark .cal-times{ color:var(--muted-dark); }
+
+/* ---------- Settings page ---------- */
+.settings-group{
+  margin:14px 20px;
+  background:#fff;
+  border-radius:var(--radius-md);
+  border:1px solid rgba(0,0,0,.05);
+  overflow:hidden;
+}
+body.dark .settings-group{ background:var(--night-800); border-color:rgba(255,255,255,.05); }
+.settings-label{
+  padding:12px 16px 4px;
+  font-size:11.5px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  color:var(--muted-light);
+}
+body.dark .settings-label{ color:var(--muted-dark); }
+.settings-row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:13px 16px;
+  border-top:1px solid rgba(0,0,0,.05);
+  font-size:14.5px;
+  gap:10px;
+}
+body.dark .settings-row{ border-top:1px solid rgba(255,255,255,.05); }
+.settings-row:first-of-type{ border-top:none; }
+.settings-row select, .settings-row input[type=text]{
+  border:none; background:transparent; color:inherit;
+  font-family:inherit; font-size:14px; text-align:end;
+  outline:none; max-width:150px;
+}
+.lang-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:8px;
+  padding:12px 16px 16px;
+}
+.lang-chip{
+  padding:10px; border-radius:12px; text-align:center;
+  border:1.5px solid rgba(127,163,155,.3);
+  cursor:pointer; font-size:13.5px; font-weight:600;
+  background:transparent; color:inherit;
+}
+.lang-chip.active{
+  background:var(--teal-600); color:#fff; border-color:var(--teal-600);
+}
+.theme-toggle-row{
+  display:flex; gap:8px; padding:12px 16px 16px;
+}
+.theme-chip{
+  flex:1; padding:10px; border-radius:12px; text-align:center;
+  border:1.5px solid rgba(127,163,155,.3);
+  cursor:pointer; font-size:13px; font-weight:600;
+  background:transparent; color:inherit;
+}
+.theme-chip.active{ background:var(--gold-500); border-color:var(--gold-500); color:var(--night-950); }
+
+.loading-screen{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  height:100vh; gap:10px; color:var(--muted-light);
+}
+body.dark .loading-screen{ color:var(--muted-dark); }
+.spinner{
+  width:34px;height:34px;border-radius:50%;
+  border:3px solid rgba(127,163,155,.25);
+  border-top-color:var(--teal-500);
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg);} }
+
+::-webkit-scrollbar{ width:0; height:0; }
+</style>
+</head>
+<body class="dark">
+<div id="app"><div class="loading-screen"><div class="spinner"></div><div id="loadingText">جارِ التحميل…</div></div></div>
+
+<script>
+/* ============================================================
+   MAWAQIT — Prayer Times App
+   Vanilla JS SPA (no build step) — mirrors what would ship as
+   React components: state, render-on-change, componentized views.
+   Preferences persisted via window.storage (per-user, not shared).
+============================================================ */
+
+const KAABA = { lat: 21.4225, lng: 39.8262 };
+
+const TRANSLATIONS = {
+  ar: {
+    dir:'rtl', font:'var(--font-display)',
+    appName:'مواقيت', fajr:'الفجر', sunrise:'الشروق', dhuhr:'الظهر', asr:'العصر',
+    maghrib:'المغرب', isha:'العشاء', nextIn:'الصلاة القادمة خلال', now:'حان الآن',
+    hours:'س', minutes:'د', seconds:'ث',
+    home:'الرئيسية', qibla:'القبلة', calendar:'التقويم', settings:'الإعدادات',
+    azkarTitle:'أذكار وأدعية', language:'اللغة', city:'المدينة', method:'طريقة الحساب',
+    notifications:'التنبيهات', appearance:'المظهر', dark:'داكن', light:'فاتح',
+    qiblaDirection:'اتجاه القبلة', qiblaHint:'وجّه هاتفك وسيشير المؤشر نحو الكعبة',
+    enableCompass:'تفعيل البوصلة', degrees:'درجة عن الشمال',
+    monthlyCalendar:'مواقيت الشهر', useLocation:'استخدام موقعي الحالي', settingsSaved:'يتم الحفظ تلقائيًا',
+    calcMethods:{5:'الهيئة المصرية العامة للمساحة',3:'رابطة العالم الإسلامي',2:'الجامعة الإسلامية بكراتشي',4:'أم القرى'}
+  },
+  en: {
+    dir:'ltr', font:'var(--font-body)',
+    appName:'Mawaqit', fajr:'Fajr', sunrise:'Sunrise', dhuhr:'Dhuhr', asr:'Asr',
+    maghrib:'Maghrib', isha:'Isha', nextIn:'Next prayer in', now:'It\'s time',
+    hours:'h', minutes:'m', seconds:'s',
+    home:'Home', qibla:'Qibla', calendar:'Calendar', settings:'Settings',
+    azkarTitle:'Azkar & Duas', language:'Language', city:'City', method:'Calculation method',
+    notifications:'Notifications', appearance:'Appearance', dark:'Dark', light:'Light',
+    qiblaDirection:'Qibla direction', qiblaHint:'Point your phone — the needle points to the Kaaba',
+    enableCompass:'Enable compass', degrees:'° from North',
+    monthlyCalendar:'Monthly Times', useLocation:'Use my location', settingsSaved:'Saved automatically',
+    calcMethods:{5:'Egyptian General Authority',3:'Muslim World League',2:'University of Karachi',4:'Umm Al-Qura'}
+  },
+  fr: {
+    dir:'ltr', font:'var(--font-body)',
+    appName:'Mawaqit', fajr:'Fajr', sunrise:'Lever du soleil', dhuhr:'Dhuhr', asr:'Asr',
+    maghrib:'Maghrib', isha:'Isha', nextIn:'Prochaine prière dans', now:'C\'est l\'heure',
+    hours:'h', minutes:'m', seconds:'s',
+    home:'Accueil', qibla:'Qibla', calendar:'Calendrier', settings:'Réglages',
+    azkarTitle:'Azkar et invocations', language:'Langue', city:'Ville', method:'Méthode de calcul',
+    notifications:'Notifications', appearance:'Apparence', dark:'Sombre', light:'Clair',
+    qiblaDirection:'Direction de la Qibla', qiblaHint:'Orientez votre téléphone — l\'aiguille pointe vers la Kaaba',
+    enableCompass:'Activer la boussole', degrees:'° du Nord',
+    monthlyCalendar:'Horaires du mois', useLocation:'Utiliser ma position', settingsSaved:'Enregistré automatiquement',
+    calcMethods:{5:'Autorité générale égyptienne',3:'Ligue islamique mondiale',2:'Université de Karachi',4:'Umm Al-Qura'}
+  },
+  ur: {
+    dir:'rtl', font:'var(--font-ur)',
+    appName:'مواقیت', fajr:'فجر', sunrise:'طلوع آفتاب', dhuhr:'ظہر', asr:'عصر',
+    maghrib:'مغرب', isha:'عشاء', nextIn:'اگلی نماز میں', now:'وقت ہو گیا',
+    hours:'گھنٹے', minutes:'منٹ', seconds:'سیکنڈ',
+    home:'ہوم', qibla:'قبلہ', calendar:'کیلنڈر', settings:'ترتیبات',
+    azkarTitle:'اذکار و دعائیں', language:'زبان', city:'شہر', method:'حساب کا طریقہ',
+    notifications:'اطلاعات', appearance:'تھیم', dark:'ڈارک', light:'لائٹ',
+    qiblaDirection:'قبلہ کی سمت', qiblaHint:'اپنا فون موڑیں — سوئی خانہ کعبہ کی طرف اشارہ کرے گی',
+    enableCompass:'کمپاس فعال کریں', degrees:'° شمال سے',
+    monthlyCalendar:'ماہانہ اوقات', useLocation:'میری لوکیشن استعمال کریں', settingsSaved:'خودکار محفوظ',
+    calcMethods:{5:'مصری جنرل اتھارٹی',3:'مسلم ورلڈ لیگ',2:'جامعہ کراچی',4:'ام القریٰ'}
+  }
+};
+
+const AZKAR = [
+  { ar:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ', translit:'SubhanAllahi wa bihamdih' },
+  { ar:'لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ', translit:'La ilaha illallah wahdahu' },
+  { ar:'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ', translit:'Allahumma salli \'ala Muhammad' },
+  { ar:'أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ', translit:'Astaghfirullah al-\'Adheem' },
+  { ar:'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً', translit:'Rabbana atina fid-dunya hasanah' }
+];
+
+const PRAYER_ICONS = { fajr:'🌙', sunrise:'☀️', dhuhr:'🕐', asr:'🕒', maghrib:'🌇', isha:'✨' };
+const HIJRI_MONTHS = { ar:['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'] };
+
+let state = {
+  lang:'ar', theme:'dark', view:'home',
+  city:'Cairo', country:'Egypt', coords:null, method:5,
+  timings:null, hijri:null, gregorian:null,
+  monthCalendar:null, calMonthOffset:0,
+  notifPrefs:{ fajr:true, dhuhr:true, asr:true, maghrib:true, isha:true },
+  compassHeading:null, compassActive:false
+};
+
+function t(){ return TRANSLATIONS[state.lang]; }
+
+async function loadPrefs(){
+  try{
+    const res = await window.storage.get('mawaqit_prefs', false);
+    if(res && res.value){
+      const saved = JSON.parse(res.value);
+      state = { ...state, ...saved, view:'home', timings:null };
+    }
+  }catch(e){ /* no saved prefs yet */ }
+}
+
+async function savePrefs(){
+  try{
+    const { lang, theme, city, country, coords, method, notifPrefs } = state;
+    await window.storage.set('mawaqit_prefs', JSON.stringify({ lang, theme, city, country, coords, method, notifPrefs }), false);
+  }catch(e){ console.error('save failed', e); }
+}
+
+async function fetchTimings(){
+  const dateStr = new Date().toISOString().slice(0,10).split('-').reverse().join('-');
+  let url;
+  if(state.coords){
+    url = `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${state.coords.lat}&longitude=${state.coords.lng}&method=${state.method}`;
+  } else {
+    url = `https://api.aladhan.com/v1/timingsByCity/${dateStr}?city=${encodeURIComponent(state.city)}&country=${encodeURIComponent(state.country)}&method=${state.method}`;
+  }
+  const res = await fetch(url);
+  const data = await res.json();
+  state.timings = data.data.timings;
+  state.hijri = data.data.date.hijri;
+  state.gregorian = data.data.date.gregorian;
+  render();
+}
+
+async function fetchMonthCalendar(){
+  const now = new Date();
+  const target = new Date(now.getFullYear(), now.getMonth()+state.calMonthOffset, 1);
+  const month = target.getMonth()+1, year = target.getFullYear();
+  let url;
+  if(state.coords){
+    url = `https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${state.coords.lat}&longitude=${state.coords.lng}&method=${state.method}`;
+  } else {
+    url = `https://api.aladhan.com/v1/calendarByCity/${year}/${month}?city=${encodeURIComponent(state.city)}&country=${encodeURIComponent(state.country)}&method=${state.method}`;
+  }
+  const res = await fetch(url);
+  const data = await res.json();
+  state.monthCalendar = data.data;
+  state.calMonthLabel = target.toLocaleString(state.lang==='ar'?'ar-EG':'en-US', { month:'long', year:'numeric' });
+  render();
+}
+
+function prayerOrder(){ return ['fajr','sunrise','dhuhr','asr','maghrib','isha']; }
+function mainPrayers(){ return ['fajr','dhuhr','asr','maghrib','isha']; }
+
+function parseTimeToday(hhmm){
+  const [h,m] = hhmm.split(' ')[0].split(':').map(Number);
+  const d = new Date();
+  d.setHours(h,m,0,0);
+  return d;
+}
+
+function getNextPrayer(){
+  if(!state.timings) return null;
+  const now = new Date();
+  const keys = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
+  const map = { Fajr:'fajr', Dhuhr:'dhuhr', Asr:'asr', Maghrib:'maghrib', Isha:'isha' };
+  for(const k of keys){
+    const time = parseTimeToday(state.timings[k]);
+    if(time > now) return { key:map[k], time, apiKey:k };
+  }
+  // all passed -> tomorrow's Fajr
+  const time = parseTimeToday(state.timings.Fajr);
+  time.setDate(time.getDate()+1);
+  return { key:'fajr', time, apiKey:'Fajr' };
+}
+
+function fmtCountdown(ms){
+  if(ms < 0) ms = 0;
+  const totalSec = Math.floor(ms/1000);
+  const h = Math.floor(totalSec/3600);
+  const m = Math.floor((totalSec%3600)/60);
+  const s = totalSec%60;
+  return { h, m, s };
+}
+
+/* ---------------- Rendering ---------------- */
+function render(){
+  const T = t();
+  document.documentElement.lang = state.lang;
+  document.body.setAttribute('dir', T.dir);
+  document.body.className = state.theme === 'dark' ? 'dark' : '';
+  const app = document.getElementById('app');
+
+  if(!state.timings){
+    app.innerHTML = `<div class="loading-screen"><div class="spinner"></div><div>${state.lang==='ar'?'جارِ التحميل…':'Loading…'}</div></div>`;
+    return;
+  }
+
+  let pageHtml = '';
+  if(state.view === 'home') pageHtml = renderHome(T);
+  else if(state.view === 'qibla') pageHtml = renderQibla(T);
+  else if(state.view === 'calendar') pageHtml = renderCalendar(T);
+  else if(state.view === 'settings') pageHtml = renderSettings(T);
+
+  app.innerHTML = `
+    <div class="topbar">
+      <div class="brand"><span class="crescent">🌙</span> ${T.appName}</div>
+      <button class="icon-btn" onclick="toggleTheme()">${state.theme==='dark'?'☀️':'🌙'}</button>
+    </div>
+    <div class="page">${pageHtml}</div>
+    <div class="bottom-nav">
+      ${navBtn('home','🏠',T.home)}
+      ${navBtn('qibla','🧭',T.qibla)}
+      ${navBtn('calendar','📅',T.calendar)}
+      ${navBtn('settings','⚙️',T.settings)}
+    </div>
+  `;
+
+  if(state.view === 'home') startCountdownLoop();
+  if(state.view === 'qibla') updateCompassUI();
+}
+
+function navBtn(view, icon, label){
+  return `<button class="nav-btn ${state.view===view?'active':''}" onclick="setView('${view}')">
+    <span class="nav-icon">${icon}</span><span>${label}</span>
+  </button>`;
+}
+
+function renderHome(T){
+  const next = getNextPrayer();
+  const now = new Date();
+  const diff = next.time - now;
+  const cd = fmtCountdown(diff);
+
+  const hijriMonthName = state.lang==='ar' ? HIJRI_MONTHS.ar[state.hijri.month.number-1] : state.hijri.month.en;
+  const hijriStr = `${state.hijri.day} ${hijriMonthName} ${state.hijri.year} ${state.lang==='ar'?'هـ':'AH'}`;
+  const gregStr = `${state.gregorian.weekday[state.lang==='ar'?'ar':'en']}, ${state.gregorian.day} ${state.gregorian.month.en} ${state.gregorian.year}`;
+
+  const rows = mainPrayers().map(key=>{
+    const apiKey = key.charAt(0).toUpperCase()+key.slice(1);
+    const time = state.timings[apiKey];
+    const isActive = key === next.key;
+    const on = state.notifPrefs[key];
+    return `
+      <div class="prayer-row ${isActive?'active':''}">
+        <div class="pr-left">
+          <div class="pr-icon">${PRAYER_ICONS[key]}</div>
+          <div>
+            <div class="pr-name">${T[key]}</div>
+            ${isActive ? `<div class="pr-sub">${T.nextIn}</div>` : ''}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;">
+          <div class="pr-time">${formatTime(time)}</div>
+          <div class="pr-toggle ${on?'on':''}" onclick="toggleNotif('${key}')"></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  const azkarCards = AZKAR.map(a=>`
+    <div class="azkar-card">
+      <div class="azkar-arabic">${a.ar}</div>
+      <div class="azkar-translit">${a.translit}</div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="date-strip">
+      <div class="hijri-date">${hijriStr}</div>
+      <div class="greg-location">📍 ${state.city} · ${gregStr}</div>
+    </div>
+    <div class="arc-wrap">
+      <svg class="arc-svg" viewBox="0 0 400 150">${renderSunArc()}</svg>
+      <div class="arc-label">${T[next.key]} · ${formatTime(state.timings[next.apiKey])}</div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-eyebrow">${T.nextIn}</div>
+      <div class="hero-name">${T[next.key]}</div>
+      <div class="hero-time">${formatTime(state.timings[next.apiKey])}</div>
+      <div class="countdown">
+        <div class="cd-box"><div class="cd-num" id="cd-h">${pad(cd.h)}</div><div class="cd-lbl">${T.hours}</div></div>
+        <div class="cd-box"><div class="cd-num" id="cd-m">${pad(cd.m)}</div><div class="cd-lbl">${T.minutes}</div></div>
+        <div class="cd-box"><div class="cd-num" id="cd-s">${pad(cd.s)}</div><div class="cd-lbl">${T.seconds}</div></div>
+      </div>
+    </div>
+    <div class="prayer-list">${rows}
+      <div class="prayer-row">
+        <div class="pr-left">
+          <div class="pr-icon">${PRAYER_ICONS.sunrise}</div>
+          <div class="pr-name">${T.sunrise}</div>
+        </div>
+        <div class="pr-time">${formatTime(state.timings.Sunrise)}</div>
+      </div>
+    </div>
+    <div class="section-title">🤲 ${T.azkarTitle}</div>
+    <div class="azkar-scroll">${azkarCards}</div>
+  `;
+}
+
+function renderSunArc(){
+  const T = t();
+  const now = new Date();
+  const fajr = parseTimeToday(state.timings.Fajr);
+  const isha = parseTimeToday(state.timings.Isha);
+  let progress = (now - fajr) / (isha - fajr);
+  progress = Math.max(0, Math.min(1, progress));
+  const cx = 40 + progress*320, cy = 130 - Math.sin(progress*Math.PI)*95;
+  const isDark = state.theme==='dark';
+  const pathColor = isDark ? 'rgba(255,255,255,.25)' : 'rgba(20,60,50,.2)';
+  const dotColor = isDark ? '#D4AF6A' : '#1F6F5C';
+  const emoji = isDark ? '🌙' : '☀️';
+  return `
+    <path d="M 40 130 Q 200 -10 360 130" stroke="${pathColor}" stroke-width="2" fill="none" stroke-dasharray="4 6"/>
+    <circle cx="${cx}" cy="${cy}" r="9" fill="${dotColor}"/>
+    <text x="${cx}" y="${cy-16}" font-size="16" text-anchor="middle">${emoji}</text>
+  `;
+}
+
+function formatTime(t24){
+  const [h,m] = t24.split(' ')[0].split(':').map(Number);
+  const period = h>=12 ? (state.lang==='ar'?'م':'PM') : (state.lang==='ar'?'ص':'AM');
+  const h12 = h%12===0?12:h%12;
+  return `${h12}:${String(m).padStart(2,'0')} ${period}`;
+}
+function pad(n){ return String(n).padStart(2,'0'); }
+
+let countdownInterval = null;
+function startCountdownLoop(){
+  if(countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(()=>{
+    const next = getNextPrayer();
+    const diff = next.time - new Date();
+    if(diff <= 0){ fetchTimings(); return; }
+    const cd = fmtCountdown(diff);
+    const eh = document.getElementById('cd-h'), em = document.getElementById('cd-m'), es = document.getElementById('cd-s');
+    if(eh){ eh.textContent = pad(cd.h); em.textContent = pad(cd.m); es.textContent = pad(cd.s); }
+  }, 1000);
+}
+
+function renderQibla(T){
+  const heading = state.compassHeading;
+  let bearing = 0, distanceLabel = '';
+  if(state.coords){
+    bearing = computeQiblaBearing(state.coords.lat, state.coords.lng);
+  }
+  const needleRotation = heading!==null ? (bearing - heading) : bearing;
+  return `
+    <div class="qibla-wrap">
+      <div class="section-title" style="margin:0 0 4px;">🧭 ${T.qiblaDirection}</div>
+      <p style="font-size:12.5px;color:var(--muted-light);text-align:center;max-width:280px;">${T.qiblaHint}</p>
+      <div class="compass-outer">
+        <div class="compass-needle" style="transform:rotate(${needleRotation}deg);"></div>
+        <div class="compass-center"></div>
+      </div>
+      <div class="qibla-info">
+        <div class="qibla-deg">${Math.round(bearing)}${T.degrees}</div>
+        <div class="qibla-sub">${state.coords ? `${state.coords.lat.toFixed(2)}, ${state.coords.lng.toFixed(2)}` : state.city}</div>
+      </div>
+      ${!state.compassActive ? `<button class="perm-btn" onclick="enableCompass()">${T.enableCompass}</button>` : ''}
+    </div>
+  `;
+}
+
+function computeQiblaBearing(lat, lng){
+  const φ1 = lat*Math.PI/180, φ2 = KAABA.lat*Math.PI/180;
+  const Δλ = (KAABA.lng-lng)*Math.PI/180;
+  const y = Math.sin(Δλ)*Math.cos(φ2);
+  const x = Math.cos(φ1)*Math.sin(φ2) - Math.sin(φ1)*Math.cos(φ2)*Math.cos(Δλ);
+  let θ = Math.atan2(y,x)*180/Math.PI;
+  return (θ+360)%360;
+}
+
+function enableCompass(){
+  if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'){
+    DeviceOrientationEvent.requestPermission().then(resp=>{
+      if(resp === 'granted') attachCompass();
+    }).catch(()=>attachCompass());
+  } else {
+    attachCompass();
+  }
+}
+function attachCompass(){
+  state.compassActive = true;
+  window.addEventListener('deviceorientationabsolute', onOrientation, true);
+  window.addEventListener('deviceorientation', onOrientation, true);
+  if(!navigator.geolocation){ render(); return; }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    state.coords = { lat:pos.coords.latitude, lng:pos.coords.longitude };
+    render();
+  }, ()=>render());
+}
+function onOrientation(e){
+  const heading = e.webkitCompassHeading !== undefined ? e.webkitCompassHeading : (360 - e.alpha);
+  state.compassHeading = heading;
+  updateCompassUI();
+}
+function updateCompassUI(){
+  if(state.view !== 'qibla') return;
+  const needle = document.querySelector('.compass-needle');
+  if(!needle) return;
+  const bearing = state.coords ? computeQiblaBearing(state.coords.lat, state.coords.lng) : 0;
+  const rot = state.compassHeading!==null ? (bearing - state.compassHeading) : bearing;
+  needle.style.transform = `rotate(${rot}deg)`;
+}
+
+function renderCalendar(T){
+  if(!state.monthCalendar){
+    fetchMonthCalendar();
+    return `<div class="loading-screen" style="height:300px;"><div class="spinner"></div></div>`;
+  }
+  const rows = state.monthCalendar.map(d=>{
+    const isToday = d.date.gregorian.day === String(new Date().getDate()) &&
+                    d.date.gregorian.month.number === (new Date().getMonth()+1);
+    return `
+      <div class="cal-row ${isToday?'today':''}">
+        <div class="cal-day">${d.date.gregorian.day}</div>
+        <div class="cal-times">
+          <span>${T.fajr} ${formatTime(d.timings.Fajr)}</span>
+          <span>${T.dhuhr} ${formatTime(d.timings.Dhuhr)}</span>
+          <span>${T.asr} ${formatTime(d.timings.Asr)}</span>
+          <span>${T.maghrib} ${formatTime(d.timings.Maghrib)}</span>
+          <span>${T.isha} ${formatTime(d.timings.Isha)}</span>
+        </div>
+      </div>`;
+  }).join('');
+  return `
+    <div class="cal-header">
+      <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+      <div class="cal-title">📅 ${state.calMonthLabel || ''}</div>
+      <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="cal-list">${rows}</div>
+  `;
+}
+function changeMonth(delta){
+  state.calMonthOffset += delta;
+  state.monthCalendar = null;
+  render();
+}
+
+function renderSettings(T){
+  const langs = [
+    { code:'ar', label:'العربية' }, { code:'en', label:'English' },
+    { code:'fr', label:'Français' }, { code:'ur', label:'اردو' }
+  ];
+  const langChips = langs.map(l=>`
+    <div class="lang-chip ${state.lang===l.code?'active':''}" onclick="setLang('${l.code}')">${l.label}</div>
+  `).join('');
+
+  const methods = t().calcMethods;
+  const methodOptions = Object.keys(methods).map(k=>`<option value="${k}" ${Number(k)===state.method?'selected':''}>${methods[k]}</option>`).join('');
+
+  const notifRows = mainPrayers().map(key=>`
+    <div class="settings-row">
+      <span>${PRAYER_ICONS[key]} ${T[key]}</span>
+      <div class="pr-toggle ${state.notifPrefs[key]?'on':''}" onclick="toggleNotif('${key}')"></div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="settings-group">
+      <div class="settings-label">${T.language}</div>
+      <div class="lang-grid">${langChips}</div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-label">${T.appearance}</div>
+      <div class="theme-toggle-row">
+        <div class="theme-chip ${state.theme==='light'?'active':''}" onclick="setTheme('light')">☀️ ${T.light}</div>
+        <div class="theme-chip ${state.theme==='dark'?'active':''}" onclick="setTheme('dark')">🌙 ${T.dark}</div>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-label">${T.city}</div>
+      <div class="settings-row">
+        <span>📍 ${T.city}</span>
+        <input type="text" id="cityInput" value="${state.city}" onchange="setCity(this.value)">
+      </div>
+      <div class="settings-row" style="cursor:pointer;" onclick="useMyLocation()">
+        <span>🛰️ ${T.useLocation}</span><span>→</span>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-label">${T.method}</div>
+      <div class="settings-row">
+        <span>🕌 ${T.method}</span>
+        <select onchange="setMethod(this.value)">${methodOptions}</select>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-label">${T.notifications}</div>
+      ${notifRows}
+    </div>
+    <p style="text-align:center;font-size:11px;color:var(--muted-light);margin-top:6px;">${T.settingsSaved}</p>
+  `;
+}
+
+/* ---------------- Actions ---------------- */
+function setView(v){ state.view = v; if(v==='calendar'){ state.calMonthOffset=0; state.monthCalendar=null; } render(); }
+function toggleTheme(){ state.theme = state.theme==='dark' ? 'light' : 'dark'; savePrefs(); render(); }
+function setTheme(v){ state.theme = v; savePrefs(); render(); }
+function setLang(code){ state.lang = code; savePrefs(); render(); }
+function toggleNotif(key){
+  state.notifPrefs[key] = !state.notifPrefs[key];
+  if(state.notifPrefs[key] && 'Notification' in window && Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+  savePrefs(); render();
+}
+function setCity(val){
+  if(!val) return;
+  state.city = val; state.coords = null; state.timings = null;
+  savePrefs(); fetchTimings();
+}
+function setMethod(val){
+  state.method = Number(val); state.timings = null; state.monthCalendar = null;
+  savePrefs(); fetchTimings();
+}
+function useMyLocation(){
+  if(!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos=>{
+    state.coords = { lat:pos.coords.latitude, lng:pos.coords.longitude };
+    state.timings = null;
+    savePrefs(); fetchTimings();
+  });
+}
+
+/* ---------------- Init ---------------- */
+(async function init(){
+  await loadPrefs();
+  render();
+  await fetchTimings();
+})();
+</script>
+</body>
+</html>
